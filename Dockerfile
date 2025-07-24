@@ -1,24 +1,30 @@
-FROM golang:1.24-alpine AS builder
+# ---- Build Go binary ----
+FROM golang:1.24-bullseye AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN --mount=type=cache,target=/go/pkg/mod CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o slack-mcp-client ./cmd/
+RUN go build -o slack-mcp-client ./cmd/
 
-# Use Node.js for MCP servers in the final image
+# ---- Final image ----
 FROM node:20-bullseye
+
+# Install Python 3, pip, and curl for uv/uvx
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install uv (which provides uvx)
+RUN pip3 install uv
 
 WORKDIR /root/
 
-# Install any extra tools (uvx, etc.)
-RUN npm install -g uvx
-
-# Install Alpine tools if you need them (optional)
-RUN apt-get update && apt-get install -y ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
-
-# Copy the Go binary and config.json
+# Copy Go binary and config.json
 COPY --from=builder /app/slack-mcp-client .
 COPY config.json ./
+
+# (Optional) Install any global npm packages your MCP servers need
+# RUN npm install -g <your-global-npm-package>
 
 ENTRYPOINT ["./slack-mcp-client"]
