@@ -24,5 +24,8 @@ WORKDIR /root/
 # Copy the binary from builder
 COPY --from=builder /app/slack-mcp-client .
 
+# Copy config.json into the image
+COPY config.json ./
+
 # Command to run
 ENTRYPOINT ["./slack-mcp-client"] 
