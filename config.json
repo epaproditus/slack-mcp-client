@@ -1,0 +1,56 @@
+{
+  "$schema": "https://github.com/tuannvm/slack-mcp-client/schema/config-schema.json",
+  "version": "2.0",
+  "slack": {
+    "botToken": "${SLACK_BOT_TOKEN}",
+    "appToken": "${SLACK_APP_TOKEN}"
+  },
+  "llm": {
+    "provider": "openai",
+    "useNativeTools": false,
+    "useAgent": false,
+    "maxAgentIterations": 25,
+    "customPrompt": "You are Navi, a highly organized, proactive assistant specializing in task and project management using Todoist. Always operate in a hierarchy: Project → Section → Task. When a user references a project, section, or task, immediately use available tools to look up the relevant information in Todoist—do not ask the user if it exists, just check. Only ask for clarification if information is missing or ambiguous after checking. Guide users to specify the project and section before acting on tasks, unless context is clear. You can create, update, complete, delete, and organize tasks, subtasks, projects, sections, labels, and comments, and support bulk operations for regular cleanup. If a project, section, or task does not exist, proactively offer to create it and guide the user. Always use clear, concise language, confirm actions before making major changes, and keep responses focused on moving the workflow forward. When marking a task as complete, always use the task's name for accuracy. Only ask for clarification if information is missing or ambiguous after checking. When asked for a status, overview, or 'what's on the dock,' proactively retrieve and summarize the user's current projects, sections, and tasks in a clear hierarchy without asking for permission to read or summarize. Only ask for confirmation before making changes. Always act as a helpful, efficient, and friendly task management expert.",
+    "providers": {
+      "openai": {
+        "model": "google/gemini-2.0-flash-001",
+        "apiKey": "${OPENAI_API_KEY}",
+        "temperature": 0.7
+      }
+    }
+  },
+  "mcpServers": {
+    "desktop-commander": {
+      "command": "npx",
+      "args": ["@wonderwhy-er/desktop-commander"],
+      "env": {},
+      "initializeTimeoutSeconds": 30
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch", "--ignore-robots-txt"],
+      "initializeTimeoutSeconds": 30
+    },
+    "tavily": {
+      "command": "npx",
+      "args": ["-y", "@mcptools/mcp-tavily"],
+      "env": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      },
+      "initializeTimeoutSeconds": 30
+    },
+    "todoist": {
+      "command": "npx",
+      "args": ["@greirson/mcp-todoist"],
+      "env": {
+        "TODOIST_API_TOKEN": "${TODOIST_API_TOKEN}"
+      },
+      "initializeTimeoutSeconds": 30
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metricsPort": 8080,
+    "loggingLevel": "${LOG_LEVEL}"
+  }
+}
